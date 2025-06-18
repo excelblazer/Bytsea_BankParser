@@ -27,7 +27,15 @@ export default defineConfig(({ mode }: { mode: string }) => {
         outDir: 'dist',
         sourcemap: mode !== 'production',
         // Ensure index.html gets copied to the dist folder
-        copyPublicDir: true
+        copyPublicDir: true,
+        rollupOptions: {
+          output: {
+            // Ensure asset paths are relative for better compatibility with different deployment environments
+            assetFileNames: 'assets/[name].[hash].[ext]',
+            chunkFileNames: 'assets/[name].[hash].js',
+            entryFileNames: 'assets/[name].[hash].js'
+          }
+        }
       }
     };
 });

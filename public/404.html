@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found - BytSea Statement Parser</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-gray-100 min-h-screen flex flex-col items-center justify-center">
+  <div class="container mx-auto px-4 py-16 text-center">
+    <h1 class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-cyan-300 mb-6">
+      404 - Page Not Found
+    </h1>
+    <p class="text-lg text-slate-300 mb-8">
+      The page you're looking for doesn't exist or has been moved.
+    </p>    <a href="/Bytsea_BankParser/" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition-colors">
+      Return to Home
+    </a>
+  </div>  <script>
+    // Enhanced redirect for GitHub Pages SPA
+    (function() {
+      const location = window.location;
+      const pathSegments = location.pathname.split('/');
+      const isInRepo = pathSegments.includes('Bytsea_BankParser');
+      
+      // If we're already in the repository folder but with a wrong path, just go to the root of the repo
+      if (isInRepo) {
+        // Find the repository in the path and construct the correct URL
+        const repoIndex = pathSegments.indexOf('Bytsea_BankParser');
+        const newPath = pathSegments.slice(0, repoIndex + 1).join('/') + '/';
+        window.location.replace(`${location.protocol}//${location.host}${newPath}${location.search}${location.hash}`);
+      } else {
+        // If we're completely outside the repository path, go to the repo root
+        window.location.replace(`${location.protocol}//${location.host}/Bytsea_BankParser/${location.search}${location.hash}`);
+      }
+    })();
+  </script>
+</body>
+</html>

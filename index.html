@@ -180,12 +180,6 @@
     }
   </style>
 <!-- Import Map must come before any module scripts -->
-
-
-<!-- Environment detection -->
-
-<!-- Resource loading check -->
-
 <script type="importmap">
 {
   "imports": {
@@ -198,8 +192,17 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/Bytsea_BankParser./assets/main.Ckbx5DlA.js"></script>
-  <link rel="stylesheet" crossorigin href="/Bytsea_BankParser./assets/main.tn0RQdqM.css">
+
+<!-- Environment detection -->
+<script type="module">
+  // This script detects if we're in dev or prod mode and adjusts imports accordingly
+  window.__DEV_MODE__ = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+</script>
+
+<!-- Resource loading check -->
+<script type="module" src="./resource-check.js"></script>
+
+<link rel="stylesheet" href="./index.css">
 </head>
 <body class="bg-slate-900 text-gray-100 min-h-screen flex flex-col">
   <!-- Animated background elements -->
@@ -381,5 +384,13 @@
   </script>
 
   <!-- Entry point that works with Vite build system -->
+  <script type="module">
+    // In production, Vite will replace this with the bundled code
+    // In development, we import directly
+    import('./index.tsx').catch(error => {
+      console.error('Failed to load application:', error);
+      document.getElementById('root').innerHTML = '<div class="error-message p-4 bg-red-800/50 border border-red-600 rounded-lg mx-auto max-w-lg my-8 text-center"><h2 class="text-xl font-semibold text-red-200 mb-2">Application Error</h2><p class="text-red-200">Failed to load the application. Please check your connection and reload the page.</p></div>';
+    });
+  </script>
 </body>
 </html>

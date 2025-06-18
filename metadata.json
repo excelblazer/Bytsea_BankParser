@@ -1,7 +1,0 @@
-
-{
-  "name": "Bytsea Statement Parser",
-  "description": "An application to parse bank and card statement details from PDF, Word, or Image files into CSV/Excel format using AI. Extracts transaction date, description, reference, and amount (debit/credit).",
-  "producer": "github.com/excelblazer",
-  "requestFramePermissions": []
-}

@@ -84,7 +84,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ onKeySet }) => {
       
       <p className="mt-4 text-xs text-slate-400">
         Your API key is stored only in your browser's local storage and never sent to our servers.
-        It is used only to communicate directly with Google's Gemini API.
+        It is used only to communicate directly with Google's Gemini API. You are open to investigate the code and see how it works by navigating to the <a href="https://github.com/excelblazer/Bytsea-BankParser" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">repository</a>.
       </p>
     </div>
   );

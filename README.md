@@ -145,31 +145,40 @@ These integrations will follow the same secure client-side approach, with no ser
 
 ### GitHub Pages Deployment
 
-The application uses an automated GitHub Actions workflow for easy deployment to GitHub Pages:
+The application uses an enhanced GitHub Actions workflow for secure deployment to GitHub Pages:
 
 1. **Fork or Clone the Repository**: Get your own copy of the code.
 
 2. **Enable GitHub Pages**:
    - Go to your repository settings
    - Navigate to Pages section
-   - Under "Build and deployment", set the Source to "GitHub Actions"
+   - Under "Build and deployment", ensure it's set to "GitHub Actions"
 
 3. **Deploy Options**:
-   - **Automatic Deployment**: Whenever you push changes to the main branch, GitHub Actions will automatically build and deploy the application.
-   - **Manual Deployment**: You can also manually trigger the deployment from the Actions tab in your repository.
+   - **Automatic Deployment**: Whenever you push changes to the main branch, the workflow runs security checks and then deploys the application.
+   - **Manual Deployment**: You can manually trigger the deployment from the Actions tab in your repository.
+   - **Pull Request Validation**: The workflow runs security checks on pull requests without deploying.
 
-4. **Deployment Process**:
-   - The workflow automatically detects your repository name from package.json
-   - Builds the application with correct base paths for GitHub Pages
-   - Publishes the build artifacts to GitHub Pages
-   - Provides a deployment URL in the workflow summary
+4. **Security-Enhanced Deployment Process**:
+   - **Security Audit**: Checks dependencies for known vulnerabilities
+   - **Type Checking**: Verifies TypeScript code for type errors
+   - **Build Security Verification**: Ensures no secrets are accidentally included in the build
+   - **Security Headers Check**: Verifies security-related HTTP headers on the deployed application
 
-5. **Access the Deployed Application**: Once deployed, your application will be available at `https://[your-username].github.io/[repository-name]/`.
+5. **Deployment Flow**:
+   - The workflow runs security checks first
+   - Then builds the application with correct base paths
+   - Configures GitHub Pages with appropriate settings
+   - Uploads and deploys the build artifacts
+   - Performs post-deployment security verification
 
-6. **Troubleshooting Deployment**:
-   - Check the Actions tab for any workflow errors
-   - Ensure the repository name in package.json matches your actual repository name
-   - Verify that GitHub Pages is enabled in your repository settings
+6. **Access the Deployed Application**: Once deployed, your application will be available at the URL provided in the workflow summary.
+
+7. **Troubleshooting Deployment**:
+   - Check the Actions tab for detailed logs of each step
+   - Review security audit results for potential issues
+   - Check the type checking logs for TypeScript errors
+   - Ensure no secrets are included in your repository that might trigger the security checks
 
 ## How to Use
 

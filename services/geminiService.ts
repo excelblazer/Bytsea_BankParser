@@ -29,6 +29,41 @@ const parseJsonFromText = (text: string): ParsedTransaction[] | null => {
 
   try {
     const parsedData = JSON.parse(jsonStr);
+    
+    // Handle the new format with metadata separate from transactions
+    if (parsedData && 
+        typeof parsedData.bankName === 'string' &&
+        typeof parsedData.clientName === 'string' &&
+        Array.isArray(parsedData.transactions)) {
+      
+      // Convert the new format to the old format for backward compatibility
+      const transactions = parsedData.transactions.map((t: any) => ({
+        bankName: parsedData.bankName,
+        clientName: parsedData.clientName,
+        transactionDate: t.transactionDate,
+        description: t.description,
+        referenceNumber: t.referenceNumber,
+        amount: t.amount
+      }));
+      
+      // Store the statement period and currency in localStorage for use in filename and display
+      if (parsedData.statementPeriod) {
+        localStorage.setItem('statement_period', parsedData.statementPeriod);
+      } else {
+        localStorage.removeItem('statement_period');
+      }
+      
+      // Store the currency information
+      if (parsedData.currency) {
+        localStorage.setItem('statement_currency', parsedData.currency);
+      } else {
+        localStorage.removeItem('statement_currency');
+      }
+      
+      return transactions as ParsedTransaction[];
+    }
+    
+    // Handle the old format for backward compatibility
     if (Array.isArray(parsedData) && parsedData.every(item => 
         typeof item.bankName === 'string' &&
         typeof item.clientName === 'string' &&
@@ -39,7 +74,8 @@ const parseJsonFromText = (text: string): ParsedTransaction[] | null => {
     )) {
       return parsedData as ParsedTransaction[];
     }
-    console.warn("Parsed JSON does not match ParsedTransaction[] structure:", parsedData);
+    
+    console.warn("Parsed JSON does not match expected structure:", parsedData);
     return null;
   } catch (e) {
     console.error("Failed to parse JSON response from Gemini:", e);

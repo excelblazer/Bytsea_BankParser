@@ -5,13 +5,62 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bytsea Statement Parser</title>
+  <link rel="icon" href="https://bytsea.com/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="https://bytsea.com/favicon.ico" type="image/x-icon">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: 'Inter', sans-serif; /* A nice default sans-serif font */
+      position: relative;
+      overflow-x: hidden;
     }
+    
+    /* Animated background effect similar to bytsea.com */
+    .gradient-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    
+    .bg-blur {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.2;
+    }
+    
+    .bg-blur-1 {
+      width: 35vw;
+      height: 35vw;
+      background: radial-gradient(circle, rgba(91, 33, 182, 0.6) 0%, rgba(72, 44, 191, 0.2) 70%, transparent 100%);
+      top: -5%;
+      left: 0;
+      transform: translateX(-30%);
+    }
+    
+    .bg-blur-2 {
+      width: 40vw;
+      height: 40vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(37, 99, 235, 0.2) 70%, transparent 100%);
+      bottom: 0;
+      right: -10%;
+    }
+    
+    .bg-blur-3 {
+      width: 25vw;
+      height: 25vw;
+      background: radial-gradient(circle, rgba(190, 24, 93, 0.3) 0%, rgba(157, 23, 77, 0.1) 70%, transparent 100%);
+      top: 40%;
+      left: 20%;
+    }
+    
     /* Custom scrollbar for better aesthetics */
     ::-webkit-scrollbar {
       width: 8px;
@@ -28,6 +77,74 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #555;
     }
+    
+    /* Additional styles for layout */
+    html, body {
+      height: 100%;
+    }
+    
+    .flex-col {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .flex-grow {
+      flex-grow: 1;
+    }
+    
+    /* Hover effects for links and buttons */
+    a:hover {
+      opacity: 0.9;
+    }
+    
+    /* Styles for API connection boxes */
+    .api-box {
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    
+    .api-box:hover:not(.cursor-not-allowed) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Disabled element styles */
+    .cursor-not-allowed {
+      pointer-events: none;
+    }
+    
+    /* Modal animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-overlay {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    
+    .modal-content {
+      animation: slideUp 0.3s ease-out forwards;
+    }
+    
+    /* Header and Footer shared styles */
+    header, footer {
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      background-color: rgba(15, 23, 42, 0.95); /* slate-900 with opacity */
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Header styling - removed gradient border since it's now managed in App.tsx */
+    
+    /* Gradient bottom border effect */
+    footer {
+      border-image: linear-gradient(to right, #3b82f6, #9333ea) 1;
+      border-bottom-width: 4px;
+    }
   </style>
 <script type="importmap">
 {
@@ -41,9 +158,144 @@
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-<body class="bg-gradient-to-br from-slate-900 to-slate-800 text-gray-100 min-h-screen flex items-center justify-center p-4">
-  <div id="root"></div>
+<body class="bg-slate-900 text-gray-100 min-h-screen flex flex-col">
+  <!-- Animated background elements -->
+  <div class="gradient-bg">
+    <div class="bg-blur bg-blur-1"></div>
+    <div class="bg-blur bg-blur-2"></div>
+    <div class="bg-blur bg-blur-3"></div>
+  </div>
+  
+  <!-- Header -->
+  <header class="w-full p-4 relative z-20">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-6">
+        <a href="https://bytsea.com" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 transition-colors flex items-center">
+          <!-- BytSea Logo (stylized B) -->
+          <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center mr-2 shadow-lg">
+            <span class="text-white font-bold text-lg">B</span>
+          </div>
+          <span class="text-lg font-semibold">bytsea.com</span>
+        </a>
+        <div class="border-r border-slate-700 h-8 hidden md:block"></div>
+        <div class="hidden md:block text-slate-400 text-xs">
+          Simple solutions for a complex world
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="https://github.com/excelblazer" target="_blank" rel="noopener noreferrer" 
+           class="group flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-md transition-all">
+          <svg class="h-5 w-5 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+          </svg>
+          <span class="text-slate-300 group-hover:text-white">GitHub</span>
+        </a>
+        <button class="text-slate-400 hover:text-white hidden md:flex items-center" id="themeToggle">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Theme Toggle Script -->
+  <script>
+    // This is a placeholder for future theme toggle functionality
+    // Could be expanded in the future to support light/dark modes
+    document.getElementById('themeToggle')?.addEventListener('click', () => {
+      alert('Theme toggle feature coming soon!');
+    });
+  </script>
+
+  <!-- Main Content -->
+  <main class="flex-grow flex items-center justify-center p-4 relative z-10">
+    <div id="root" class="w-full"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full p-4 border-b-2 border-purple-600 relative z-20">
+    <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-slate-400">
+      <div class="mb-4 md:mb-0">
+        Crafted with React, TypeScript & API Integration.
+        <div class="mt-2 flex space-x-4">
+          <a href="mailto:roshan@bytsea.com" class="hover:text-blue-400 transition-colors flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+            </svg>
+            Contact
+          </a>
+          <a href="#" class="hover:text-blue-400 transition-colors flex items-center" id="privacyLink">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 2a2 2 0 00-2 2v1H5a2 2 0 00-2 2v11a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-3V4a2 2 0 00-2-2zm0 2v1H5v11h10V7h-3V4h-2z" clip-rule="evenodd" />
+            </svg>
+            Privacy Policy
+          </a>
+        </div>
+      </div>
+      <div class="flex flex-col items-end">
+        <div class="flex items-center mb-2">
+          <span>Made with</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mx-1 animate-pulse" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+          </svg>
+          <span>in New Delhi</span>
+        </div>
+        <div class="text-xs text-right">
+          <span id="currentYear"> © 2025. Roshan- </span> Transforming businesses with innovative solutions
+        </div>
+      </div>
+    </div>
+    
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-slate-800 p-6 rounded-lg max-w-lg max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-blue-400">Privacy Policy</h3>
+          <button id="closeModal" class="text-gray-400 hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="text-slate-300 text-sm">
+          <p class="mb-2">This app processes financial data entirely within your browser. Your data never leaves your device.</p>
+          <p class="mb-2">The Google Gemini API is used for AI-powered data extraction, but your personal API key and data are stored only in your browser's local storage.</p>
+          <p>We do not track, store, or share any of your financial information or uploaded documents.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Footer Functionality -->
+  <script>
+    // Update year automatically
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+    
+    // Privacy modal functionality
+    const privacyLink = document.getElementById('privacyLink');
+    const privacyModal = document.getElementById('privacyModal');
+    const closeModal = document.getElementById('closeModal');
+    
+    privacyLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      privacyModal.classList.remove('hidden');
+    });
+    
+    closeModal.addEventListener('click', () => {
+      privacyModal.classList.add('hidden');
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+      if (e.target === privacyModal) {
+        privacyModal.classList.add('hidden');
+      }
+    });
+  </script>
+
   <script type="module" src="./index.tsx"></script>
-<script type="module" src="/index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
 </body>
 </html>

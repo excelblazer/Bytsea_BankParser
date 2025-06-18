@@ -6,7 +6,7 @@
   "homepage": "https://excelblazer.github.io/Bytsea_BankParser/",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node inject-assets.js",
     "preview": "vite preview",
     "deploy": "node deploy.js",
     "deploy:gh": "node deploy-gh.js",
@@ -21,6 +21,7 @@
     "@types/node": "^22.14.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.5.2",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
   }

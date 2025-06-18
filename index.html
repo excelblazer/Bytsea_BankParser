@@ -383,14 +383,8 @@
     });
   </script>
 
-  <!-- Entry point that works with Vite build system -->
-  <script type="module">
-    // In production, Vite will replace this with the bundled code
-    // In development, we import directly
-    import('./index.tsx').catch(error => {
-      console.error('Failed to load application:', error);
-      document.getElementById('root').innerHTML = '<div class="error-message p-4 bg-red-800/50 border border-red-600 rounded-lg mx-auto max-w-lg my-8 text-center"><h2 class="text-xl font-semibold text-red-200 mb-2">Application Error</h2><p class="text-red-200">Failed to load the application. Please check your connection and reload the page.</p></div>';
-    });
-  </script>
+  <!-- Entry point for the React application -->
+  <script type="module" src="./index.tsx"></script>
+  
 </body>
 </html>

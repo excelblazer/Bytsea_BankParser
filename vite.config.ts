@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }: { mode: string }) => {
     // Load env variables is kept for future use if needed
@@ -9,6 +10,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
     const isGitHubPages = process.env.GITHUB_PAGES === 'true';
     
     return {
+      plugins: [react()],
       base: mode === 'production' || isGitHubPages ? `/Bytsea_BankParser/` : '/',
       define: {
         // We're not using environment variables for API keys anymore
@@ -29,9 +31,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
         // Minify output for production builds
         minify: mode === 'production' ? 'esbuild' : false,
         rollupOptions: {
-          input: {
-            main: resolve(__dirname, 'index.html')
-          },
+          input: resolve(__dirname, 'index.html'),
           output: {
             // Ensure asset paths are relative for better compatibility with different deployment environments
             assetFileNames: 'assets/[name].[hash].[ext]',
@@ -44,7 +44,9 @@ export default defineConfig(({ mode }: { mode: string }) => {
               }
             }
           }
-        }
+        },
+        // Ensure HTML transformation works properly
+        emptyOutDir: true
       }
     };
 });

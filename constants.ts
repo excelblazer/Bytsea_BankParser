@@ -1,6 +1,6 @@
 
 export const GEMINI_MODEL_NAME = "gemini-2.5-flash-preview-04-17";
-export const APP_TITLE = "AI Statement Parser";
+export const APP_TITLE = "Bytsea Statement Parser";
 
 export const GEMINI_SYSTEM_INSTRUCTION_TEXT_INPUT = `You are an expert financial data extraction AI. Your task is to parse bank statements or credit card statements from the provided text content.
 Extract all transaction details accurately.

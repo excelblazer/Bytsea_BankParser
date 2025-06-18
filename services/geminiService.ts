@@ -3,14 +3,10 @@ import { GoogleGenAI, GenerateContentResponse, Part } from "@google/genai";
 import { ParsedTransaction } from '../types';
 import { GEMINI_MODEL_NAME, GEMINI_SYSTEM_INSTRUCTION_TEXT_INPUT, GEMINI_PROMPT_FOR_FILE } from '../constants';
 
-// Get API key from environment or local storage
+// Get API key from local storage only
 const getApiKey = (): string | null => {
-  // Check local storage first
-  const localStorageKey = localStorage.getItem('gemini_api_key');
-  if (localStorageKey) return localStorageKey;
-  
-  // Fall back to environment variable if available
-  return process.env.API_KEY || null;
+  // Get API key from local storage
+  return localStorage.getItem('gemini_api_key');
 };
 
 // Function to set API key in local storage

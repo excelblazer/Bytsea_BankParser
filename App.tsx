@@ -105,7 +105,9 @@ const App: React.FC = () => {
           {APP_TITLE}
         </h1>
         <p className="text-slate-400 text-lg">
-          Upload your bank or card statements (PDF, DOCX, TXT, Images) to extract transactions.
+          {apiKeyStatus === 'missing' 
+            ? "First, enter your Google Gemini API key to enable transaction extraction." 
+            : "Upload your bank or card statements (PDF, DOCX, TXT, Images) to extract transactions."}
         </p>
       </header>
       
@@ -122,7 +124,17 @@ const App: React.FC = () => {
 
       {/* Only show the file upload when API key is configured */}
       {apiKeyStatus === 'ok' && (
-        <FileUpload onFileSelect={handleFileSelect} disabled={isLoading} />
+        <>
+          <div className="w-full max-w-xl mx-auto mb-4 flex justify-end">
+            <button
+              onClick={() => setApiKeyStatus('missing')}
+              className="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors duration-200"
+            >
+              Change API Key
+            </button>
+          </div>
+          <FileUpload onFileSelect={handleFileSelect} disabled={isLoading} />
+        </>
       )}
 
       {selectedFile && apiKeyStatus === 'ok' && (

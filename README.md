@@ -145,15 +145,31 @@ These integrations will follow the same secure client-side approach, with no ser
 
 ### GitHub Pages Deployment
 
-The application is set up for easy deployment to GitHub Pages using GitHub Actions:
+The application uses an automated GitHub Actions workflow for easy deployment to GitHub Pages:
 
 1. **Fork or Clone the Repository**: Get your own copy of the code.
 
-2. **Enable GitHub Pages**: Go to your repository settings, find the Pages section, and set the source to "GitHub Actions".
+2. **Enable GitHub Pages**:
+   - Go to your repository settings
+   - Navigate to Pages section
+   - Under "Build and deployment", set the Source to "GitHub Actions"
 
-3. **Push to Main Branch**: Whenever you push changes to the main branch, GitHub Actions will automatically build and deploy the application.
+3. **Deploy Options**:
+   - **Automatic Deployment**: Whenever you push changes to the main branch, GitHub Actions will automatically build and deploy the application.
+   - **Manual Deployment**: You can also manually trigger the deployment from the Actions tab in your repository.
 
-4. **Access the Deployed Application**: Your application will be available at `https://[your-username].github.io/[repository-name]/`.
+4. **Deployment Process**:
+   - The workflow automatically detects your repository name from package.json
+   - Builds the application with correct base paths for GitHub Pages
+   - Publishes the build artifacts to GitHub Pages
+   - Provides a deployment URL in the workflow summary
+
+5. **Access the Deployed Application**: Once deployed, your application will be available at `https://[your-username].github.io/[repository-name]/`.
+
+6. **Troubleshooting Deployment**:
+   - Check the Actions tab for any workflow errors
+   - Ensure the repository name in package.json matches your actual repository name
+   - Verify that GitHub Pages is enabled in your repository settings
 
 ## How to Use
 

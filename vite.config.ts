@@ -1,21 +1,33 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig(({ mode }: { mode: string }) => {
-    const env = loadEnv(mode, '.', '');
-    // Get repository name for GitHub Pages or use a default
-    const repoName = 'ai-statement-parser';
+    // Load env variables is kept for future use if needed
+    // const env = loadEnv(mode, '.', '');
+    
+    // Get repository name for GitHub Pages by detecting repository name from package.json
+    // This reads the name from package.json and removes any org prefix
+    const pkgName = process.env.npm_package_name || 'bytsea-statement-parser';
+    const repoName = pkgName.includes('/') ? pkgName.split('/')[1] : pkgName;
     
     return {
       base: mode === 'production' ? `/${repoName}/` : '/',
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        // We're not using environment variables for API keys anymore
+        // as users provide their own keys through the UI
+        'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version),
+        'process.env.NODE_ENV': JSON.stringify(mode)
       },
       resolve: {
         alias: {
           '@': resolve(__dirname, '.'),
         }
+      },
+      build: {
+        outDir: 'dist',
+        sourcemap: mode !== 'production',
+        // Ensure index.html gets copied to the dist folder
+        copyPublicDir: true
       }
     };
 });

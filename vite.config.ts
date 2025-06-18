@@ -5,13 +5,11 @@ export default defineConfig(({ mode }: { mode: string }) => {
     // Load env variables is kept for future use if needed
     // const env = loadEnv(mode, '.', '');
     
-    // Get repository name for GitHub Pages by detecting repository name from package.json
-    // This reads the name from package.json and removes any org prefix
-    const pkgName = process.env.npm_package_name || 'bytsea-statement-parser';
-    const repoName = pkgName.includes('/') ? pkgName.split('/')[1] : pkgName;
+    // For GitHub Pages deployment - using explicit repository name
+    const isGitHubPages = process.env.GITHUB_PAGES === 'true';
     
     return {
-      base: mode === 'production' ? `/${repoName}/` : '/',
+      base: mode === 'production' || isGitHubPages ? `/Bytsea_BankParser/` : '/',
       define: {
         // We're not using environment variables for API keys anymore
         // as users provide their own keys through the UI
@@ -28,12 +26,23 @@ export default defineConfig(({ mode }: { mode: string }) => {
         sourcemap: mode !== 'production',
         // Ensure index.html gets copied to the dist folder
         copyPublicDir: true,
+        // Minify output for production builds
+        minify: mode === 'production' ? 'esbuild' : false,
         rollupOptions: {
+          input: {
+            main: resolve(__dirname, 'index.html')
+          },
           output: {
             // Ensure asset paths are relative for better compatibility with different deployment environments
             assetFileNames: 'assets/[name].[hash].[ext]',
             chunkFileNames: 'assets/[name].[hash].js',
-            entryFileNames: 'assets/[name].[hash].js'
+            entryFileNames: 'assets/[name].[hash].js',
+            // Ensure large chunks are split
+            manualChunks(id) {
+              if (id.includes('node_modules')) {
+                return 'vendor';
+              }
+            }
           }
         }
       }

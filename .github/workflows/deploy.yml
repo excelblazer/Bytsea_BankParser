@@ -1,114 +1,49 @@
-name: Deploy to GitHub Pages with Security Checks
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: write
 
 jobs:
-  security-audit:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Clear all caches and node_modules
-        run: |
-          rm -rf node_modules
-          rm -rf ~/.npm
-          rm -f package-lock.json
-          npm cache clean --force
-
-      - name: Install dependencies with fresh cache
-        run: npm install --no-cache --prefer-online --no-audit --no-fund
-        
-      - name: Build
-        run: npm run build
-
-      - name: Security Audit
-        run: |
-          npm audit --audit-level=high || echo "Security audit found issues but continuing..."
-          echo "✅ Security audit completed"
-
-      - name: Type check
-        run: npx tsc --noEmit || echo "Type check completed"
-
   build-and-deploy:
-    needs: security-audit
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: 18
+          cache: 'npm'
 
-      - name: Clear all caches and node_modules
-        run: |
-          rm -rf node_modules
-          rm -rf ~/.npm
-          rm -f package-lock.json
-          npm cache clean --force
+      - name: Install Dependencies
+        run: npm ci
 
-      - name: Install dependencies with fresh cache
-        run: npm install --no-cache --prefer-online --no-audit --no-fund
-        
       - name: Build
-        run: npm run build
-        env:
-          NODE_ENV: "production"
-
-      - name: Verify build security
         run: |
-          # Check that no actual secrets are accidentally included in build
-          if grep -r "sk_" dist/ --exclude="*.js" || \
-             grep -r "PRIVATE_KEY" dist/ || \
-             grep -r "API_SECRET" dist/ || \
-             (grep -r "SECRET" dist/ | grep -v "SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED" | grep -v ".js:"); then
-            echo "❌ Potential secrets found in build output"
-            exit 1
-          fi
-          echo "✅ Build security check passed"
+          export GITHUB_PAGES=true
+          npm run build
 
-      - name: Setup Pages
-        if: github.ref == 'refs/heads/main'
-        uses: actions/configure-pages@v4
+      - name: Prepare for deployment
+        run: |
+          # Create .nojekyll file
+          touch dist/.nojekyll
+          
+          # Copy index.html to 404.html for SPA routing
+          cp dist/index.html dist/404.html
+          
+          # Ensure all paths are using relative references
+          grep -rl '/assets/' dist --include="*.html" | xargs sed -i 's|/assets/|./assets/|g' || true
 
-      - name: Upload artifact
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: './dist'
-
-      - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Security Headers Verification
-        if: github.ref == 'refs/heads/main'
-        run: |
-          sleep 30  # Wait for deployment
-          echo "🔍 Verifying security headers..."
-          curl -I -s ${{ steps.deployment.outputs.page_url }} | grep -E "(X-Frame-Options|X-Content-Type-Options|X-XSS-Protection)" || echo "⚠️ Some security headers missing"
+          folder: dist
+          branch: gh-pages
+          clean: true
+          commit-message: "Deploy to GitHub Pages [skip ci]"

@@ -4,6 +4,7 @@ import FileUpload from './components/FileUpload';
 import TransactionDisplay from './components/TransactionDisplay';
 import Spinner from './components/Spinner';
 import ApiKeyInput from './components/ApiKeyInput';
+import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 import { ParsedTransaction } from './types';
 import { parseStatementWithGemini } from './services/geminiService';
 import { APP_TITLE, ACCEPTED_FILE_TYPES } from './constants';
@@ -15,11 +16,11 @@ const App: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [extractedTransactions, setExtractedTransactions] = useState<ParsedTransaction[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [apiKeyStatus, setApiKeyStatus] = useState<'checking' | 'ok' | 'missing'>('checking');
+  const [error, setError] = useState<string | null>(null);  const [apiKeyStatus, setApiKeyStatus] = useState<'checking' | 'ok' | 'missing'>('checking');
   const [hasAttemptedProcessing, setHasAttemptedProcessing] = useState<boolean>(false);
   const [showApiChangeWarning, setShowApiChangeWarning] = useState<boolean>(false);
-
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState<boolean>(false);
+  const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState<boolean>(false);
   // Check for API key in local storage when component mounts
   useEffect(() => {
     const storedKey = localStorage.getItem('gemini_api_key');
@@ -28,6 +29,16 @@ const App: React.FC = () => {
     } else {
       setApiKeyStatus('missing');
       // No need for error message when first loading as the ApiKeyInput component will be shown
+    }
+  }, []);
+
+  // Check for privacy policy acceptance when component mounts
+  useEffect(() => {
+    const privacyAccepted = localStorage.getItem('privacy_policy_accepted');
+    if (privacyAccepted === 'true') {
+      setPrivacyPolicyAccepted(true);
+    } else {
+      setShowPrivacyPolicy(true);
     }
   }, []);
 
@@ -58,10 +69,23 @@ const App: React.FC = () => {
     setError(null);
     setShowApiChangeWarning(false);
   };
-  
-  // Cancel API change request
+    // Cancel API change request
   const cancelApiChange = () => {
     setShowApiChangeWarning(false);
+  };
+
+  // Handle privacy policy acceptance
+  const handlePrivacyPolicyAccept = () => {
+    localStorage.setItem('privacy_policy_accepted', 'true');
+    setPrivacyPolicyAccepted(true);
+    setShowPrivacyPolicy(false);
+  };
+
+  // Handle privacy policy decline
+  const handlePrivacyPolicyDecline = () => {
+    setShowPrivacyPolicy(false);
+    // Optionally, you could redirect away or show a message
+    // For now, we'll just close the modal and they won't be able to use the app
   };
 
 
@@ -127,18 +151,28 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="mx-auto p-4 md:p-8 min-h-screen flex flex-col items-center w-full max-w-screen-xl relative">
-      <h1 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-cyan-300 mt-6 mb-1 text-center">
-        {APP_TITLE}
-      </h1>
-      <div className="h-1 w-64 mx-auto bg-gradient-to-r from-blue-500 via-sky-400 to-cyan-300 rounded-full mb-3"></div>
-      <p className="text-slate-400 text-lg mb-10 text-center">
-        {apiKeyStatus === 'missing' 
-          ? "First, enter your Google Gemini API key to enable transaction extraction." 
-          : "Upload your bank or card statements (PDF, DOCX, TXT, Images) to extract transactions."}
-      </p>
+      
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal
+        isOpen={showPrivacyPolicy}
+        onAccept={handlePrivacyPolicyAccept}
+        onDecline={handlePrivacyPolicyDecline}
+      />
+
+      {/* Main App Content - Only show if privacy policy is accepted */}
+      {privacyPolicyAccepted && (
+        <>
+          <h1 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-cyan-300 mt-6 mb-1 text-center">
+            {APP_TITLE}
+          </h1>
+          <div className="h-1 w-64 mx-auto bg-gradient-to-r from-blue-500 via-sky-400 to-cyan-300 rounded-full mb-3"></div>
+          <p className="text-slate-400 text-lg mb-10 text-center">
+            {apiKeyStatus === 'missing' 
+              ? "First, enter your Google Gemini API key to enable transaction extraction." 
+              : "Upload your bank or card statements (PDF, DOCX, TXT, Images) to extract transactions."}
+          </p>
       
       {/* Display API Key Input component if API key is missing */}
       {apiKeyStatus === 'missing' && (
@@ -282,8 +316,7 @@ const App: React.FC = () => {
               </div>
               <div className="flex justify-end space-x-3">
                 <button 
-                  onClick={cancelApiChange}
-                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm rounded focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  onClick={cancelApiChange}                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm rounded focus:outline-none focus:ring-2 focus:ring-slate-400"
                 >
                   Cancel
                 </button>
@@ -296,7 +329,34 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-        )}
+        )}        </>
+      )}      {/* Show a message when privacy policy is not accepted */}
+      {!privacyPolicyAccepted && !showPrivacyPolicy && (
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">Privacy Policy Required</h2>
+          <p className="text-slate-300 mb-6">
+            You need to accept our privacy policy to use this application.
+          </p>
+          <button
+            onClick={() => setShowPrivacyPolicy(true)}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            Review Privacy Policy
+          </button>
+        </div>
+      )}
+
+      {/* Footer with Privacy Policy link - only show when policy is accepted */}
+      {privacyPolicyAccepted && (
+        <footer className="mt-auto pt-8 pb-4 text-center">
+          <button
+            onClick={() => setShowPrivacyPolicy(true)}
+            className="text-sm text-slate-400 hover:text-slate-300 transition-colors underline"
+          >
+            Privacy Policy
+          </button>
+        </footer>
+      )}
     </div>
   );
 };

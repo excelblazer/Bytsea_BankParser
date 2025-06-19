@@ -78,7 +78,9 @@ jobs:
           rm -rf node_modules
           rm -rf ~/.npm
           rm -f package-lock.json
-          npm cache clean --force      - name: Install dependencies with fresh cache
+          npm cache clean --force
+
+      - name: Install dependencies with fresh cache
         run: npm install --no-cache --prefer-online --no-audit --no-fund
         
       - name: Build
@@ -86,10 +88,6 @@ jobs:
         env:
           # Set GitHub Pages environment variable for proper base path
           GITHUB_PAGES: 'true'
-          # Only include public environment variables
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
 
       - name: Verify build security
         run: |

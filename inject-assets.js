@@ -49,4 +49,26 @@ if (scriptsToInject) {
 // Write the updated HTML back
 fs.writeFileSync(htmlFile, html, 'utf8');
 
+// Fix manifest and browserconfig files for GitHub Pages
+const manifestFile = path.join(distDir, 'favicon', 'site.webmanifest');
+const browserconfigFile = path.join(distDir, 'favicon', 'browserconfig.xml');
+
+// Update manifest file
+if (fs.existsSync(manifestFile)) {
+  let manifest = fs.readFileSync(manifestFile, 'utf8');
+  manifest = manifest.replace(/\/favicon\//g, '/Bytsea_BankParser/favicon/');
+  manifest = manifest.replace(/"start_url": "\/"/, '"start_url": "/Bytsea_BankParser/"');
+  manifest = manifest.replace(/"scope": "\/"/, '"scope": "/Bytsea_BankParser/"');
+  fs.writeFileSync(manifestFile, manifest, 'utf8');
+  console.log('Updated favicon paths in site.webmanifest');
+}
+
+// Update browserconfig file
+if (fs.existsSync(browserconfigFile)) {
+  let browserconfig = fs.readFileSync(browserconfigFile, 'utf8');
+  browserconfig = browserconfig.replace(/\/favicon\//g, '/Bytsea_BankParser/favicon/');
+  fs.writeFileSync(browserconfigFile, browserconfig, 'utf8');
+  console.log('Updated favicon paths in browserconfig.xml');
+}
+
 console.log('Successfully injected assets into index.html');

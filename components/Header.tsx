@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import React from 'react';
 import { FiMail, FiGithub, FiMoon } from 'react-icons/fi';
 
@@ -7,6 +8,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ apiKeyStatus, onApiChangeRequest }) => {
+  // Use Vite's base URL for the logo path
+  const logoSrc = `${import.meta.env.BASE_URL}favicon/favicon.svg`;
   return (
     <header className="fixed top-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 z-50">
       <div className="max-w-screen-xl mx-auto px-4 py-3">
@@ -14,7 +17,7 @@ const Header: React.FC<HeaderProps> = ({ apiKeyStatus, onApiChangeRequest }) => 
           {/* Left: Logo and Links */}
           <div className="flex items-center space-x-6">
             <a href="/" className="flex items-center space-x-2">
-              <img src="/favicon/favicon.svg" alt="Bytsea Logo" className="w-6 h-6" />
+              <img src={logoSrc} alt="Bytsea Logo" className="w-6 h-6" />
               <span className="text-slate-200 font-medium">bytsea.com</span>
             </a>
             <span className="text-slate-500 text-sm hidden sm:inline">

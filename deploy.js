@@ -11,6 +11,14 @@ try {
   console.log('Building project for GitHub Pages...');
   execSync('npm run build', { stdio: 'inherit' });
 
+  // Ensure consolidated.css is present in dist
+  const srcCss = path.join(__dirname, 'consolidated.css');
+  const distCss = path.join(distDir, 'consolidated.css');
+  if (fs.existsSync(srcCss)) {
+    fs.copyFileSync(srcCss, distCss);
+    console.log('consolidated.css copied to distribution folder');
+  }
+
   const distDir = path.resolve(__dirname, 'dist');
   
   // Create .nojekyll file to prevent Jekyll processing

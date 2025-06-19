@@ -46,7 +46,8 @@ export default defineConfig(({ mode }: { mode: string }) => {
           }
         },
         // Ensure HTML transformation works properly
-        emptyOutDir: true
+        emptyOutDir: true,
+        assetsInlineLimit: 0 // Ensure all CSS files like consolidated.css are emitted as separate files
       }
     };
 });

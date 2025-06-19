@@ -6,12 +6,13 @@ export default defineConfig(({ mode }: { mode: string }) => {
     // Load env variables is kept for future use if needed
     // const env = loadEnv(mode, '.', '');
     
-    // For GitHub Pages deployment - using explicit repository name
+    // For GitHub Pages deployment - check if using custom domain
     const isGitHubPages = process.env.GITHUB_PAGES === 'true';
+    const hasCustomDomain = true; // Since we have CNAME file with app.bytsea.com
     
     return {
       plugins: [react()],
-      base: mode === 'production' || isGitHubPages ? `/Bytsea_BankParser/` : '/',
+      base: mode === 'production' && isGitHubPages && !hasCustomDomain ? `/Bytsea_BankParser/` : '/',
       define: {
         // We're not using environment variables for API keys anymore
         // as users provide their own keys through the UI

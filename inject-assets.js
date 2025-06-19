@@ -53,22 +53,41 @@ fs.writeFileSync(htmlFile, html, 'utf8');
 const manifestFile = path.join(distDir, 'favicon', 'site.webmanifest');
 const browserconfigFile = path.join(distDir, 'favicon', 'browserconfig.xml');
 
+// Check if we're using custom domain (CNAME exists)
+const cnameFile = path.join(__dirname, 'CNAME');
+const hasCustomDomain = fs.existsSync(cnameFile);
+const basePath = hasCustomDomain ? '' : '/Bytsea_BankParser';
+
 // Update manifest file
 if (fs.existsSync(manifestFile)) {
   let manifest = fs.readFileSync(manifestFile, 'utf8');
-  manifest = manifest.replace(/\/favicon\//g, '/Bytsea_BankParser/favicon/');
-  manifest = manifest.replace(/"start_url": "\/"/, '"start_url": "/Bytsea_BankParser/"');
-  manifest = manifest.replace(/"scope": "\/"/, '"scope": "/Bytsea_BankParser/"');
+  if (hasCustomDomain) {
+    // For custom domain, use root paths
+    manifest = manifest.replace(/\/Bytsea_BankParser\/favicon\//g, '/favicon/');
+    manifest = manifest.replace(/"start_url": "\/Bytsea_BankParser\/"/, '"start_url": "/"');
+    manifest = manifest.replace(/"scope": "\/Bytsea_BankParser\/"/, '"scope": "/"');
+  } else {
+    // For GitHub Pages default domain, use repository path
+    manifest = manifest.replace(/\/favicon\//g, '/Bytsea_BankParser/favicon/');
+    manifest = manifest.replace(/"start_url": "\/"/, '"start_url": "/Bytsea_BankParser/"');
+    manifest = manifest.replace(/"scope": "\/"/, '"scope": "/Bytsea_BankParser/"');
+  }
   fs.writeFileSync(manifestFile, manifest, 'utf8');
-  console.log('Updated favicon paths in site.webmanifest');
+  console.log(`Updated favicon paths in site.webmanifest for ${hasCustomDomain ? 'custom domain' : 'GitHub Pages'}`);
 }
 
 // Update browserconfig file
 if (fs.existsSync(browserconfigFile)) {
   let browserconfig = fs.readFileSync(browserconfigFile, 'utf8');
-  browserconfig = browserconfig.replace(/\/favicon\//g, '/Bytsea_BankParser/favicon/');
+  if (hasCustomDomain) {
+    // For custom domain, use root paths
+    browserconfig = browserconfig.replace(/\/Bytsea_BankParser\/favicon\//g, '/favicon/');
+  } else {
+    // For GitHub Pages default domain, use repository path
+    browserconfig = browserconfig.replace(/\/favicon\//g, '/Bytsea_BankParser/favicon/');
+  }
   fs.writeFileSync(browserconfigFile, browserconfig, 'utf8');
-  console.log('Updated favicon paths in browserconfig.xml');
+  console.log(`Updated favicon paths in browserconfig.xml for ${hasCustomDomain ? 'custom domain' : 'GitHub Pages'}`);
 }
 
 console.log('Successfully injected assets into index.html');

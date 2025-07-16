@@ -71,3 +71,9 @@ This ensures the frontend always has the correct backend URL.
 ## Manual Deployment
 
 If needed, you can manually trigger deployments using the "Run workflow" button in the GitHub Actions tab.
+
+## Troubleshooting
+
+If the OCR Backend shows as "Service Unavailable":
+1. Check that the `OCR_API_URL` GitHub variable is set to your correct Vercel URL
+2. Trigger a frontend redeploy to use the updated URL

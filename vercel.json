@@ -1,10 +1,13 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/:path*.py" }
-  ],
+  "functions": {
+    "api/health.py": {
+      "runtime": "python3.9"
+    },
+    "api/parse.py": {
+      "runtime": "python3.9"
+    }
+  },
   "headers": [
     {
       "source": "/api/(.*)",

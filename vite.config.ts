@@ -17,7 +17,8 @@ export default defineConfig(({ mode }: { mode: string }) => {
         // We're not using environment variables for API keys anymore
         // as users provide their own keys through the UI
         'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version),
-        'process.env.NODE_ENV': JSON.stringify(mode)
+        'process.env.NODE_ENV': JSON.stringify(mode),
+        'process.env.VITE_OCR_API_URL': JSON.stringify(process.env.VITE_OCR_API_URL || '')
       },
       resolve: {
         alias: {

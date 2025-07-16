@@ -83,11 +83,6 @@ const AppContent: React.FC = () => {
     setShowApiChangeWarning(false);
   };
   
-  // Handle the API change process with warning
-  const handleApiChangeRequest = () => {
-    setShowApiChangeWarning(true);
-  };
-  
   // Confirm API change after warning
   const confirmApiChange = () => {
     // Clear API key from localStorage

@@ -1,0 +1,23 @@
+# Git and version control
+.git
+.github
+
+# Dependencies and build outputs
+node_modules
+dist
+
+# Logs
+*.log
+
+# Python cache and environment
+__pycache__
+.venv
+venv
+*.pyc
+
+# Environment files
+.env.local
+
+# Documentation and sample files
+README.md
+sample

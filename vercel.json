@@ -2,10 +2,10 @@
   "version": 2,
   "functions": {
     "api/health.py": {
-      "runtime": "python3.9"
+      "runtime": "@vercel/python"
     },
     "api/parse.py": {
-      "runtime": "python3.9"
+      "runtime": "@vercel/python"
     }
   },
   "headers": [

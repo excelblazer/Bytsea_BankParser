@@ -1,7 +1,13 @@
 
 import { GoogleGenAI, GenerateContentResponse, Part } from "@google/genai";
 import { ParsedTransaction } from '../types';
-import { GEMINI_MODEL_NAME, GEMINI_SYSTEM_INSTRUCTION_TEXT_INPUT, GEMINI_PROMPT_FOR_FILE } from '../constants';
+import { 
+  GEMINI_MODEL_NAME, 
+  BANK_STATEMENT_INSTRUCTION, 
+  CREDIT_CARD_STATEMENT_INSTRUCTION, 
+  LEDGER_STATEMENT_INSTRUCTION, 
+  GEMINI_PROMPT_FOR_FILE 
+} from '../constants';
 
 // Get API key from local storage only
 const getApiKey = (): string | null => {
@@ -84,9 +90,24 @@ const parseJsonFromText = (text: string): ParsedTransaction[] | null => {
   }
 };
 
+// Helper to get the correct instruction based on document type
+const getInstructionForDocType = (docType: 'bank' | 'creditcard' | 'ledger' | null): string => {
+  switch (docType) {
+    case 'bank':
+      return BANK_STATEMENT_INSTRUCTION;
+    case 'creditcard':
+      return CREDIT_CARD_STATEMENT_INSTRUCTION;
+    case 'ledger':
+      return LEDGER_STATEMENT_INSTRUCTION;
+    default:
+      return BANK_STATEMENT_INSTRUCTION; // Default to bank statement instruction
+  }
+};
+
 export const parseStatementWithGemini = async (
   fileContent: string, // Base64 string for images/PDFs, plain text for TXT/DOCX
-  mimeType: string
+  mimeType: string,
+  documentType: 'bank' | 'creditcard' | 'ledger' | null = null
 ): Promise<ParsedTransaction[]> => {
   // Get API key from local storage or environment
   const apiKey = getApiKey();
@@ -115,11 +136,13 @@ export const parseStatementWithGemini = async (
   }
 
   try {
+    const systemInstruction = getInstructionForDocType(documentType);
+    
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: GEMINI_MODEL_NAME,
       contents: { parts },
       config: {
-        systemInstruction: GEMINI_SYSTEM_INSTRUCTION_TEXT_INPUT,
+        systemInstruction,
         responseMimeType: "application/json",
       },
     });

@@ -1,3 +1,50 @@
+# --- Statement Parser Stub ---
+from typing import List, Dict, Any
+def parse_statement_text(ocr_text: str) -> List[Dict[str, Any]]:
+    """
+    Basic parser for bank/credit card statement OCR text.
+    Extracts transactions with fields: date, description, reference, amount.
+    """
+    import re
+    transactions = []
+    # Regex for date (YYYY-MM-DD, MM/DD/YYYY, DD/MM/YYYY, etc.)
+    date_pattern = re.compile(r'(\d{4}[-/]\d{2}[-/]\d{2}|\d{2}[-/]\d{2}[-/]\d{4}|\d{2}[-/]\d{2}[-/]\d{2})')
+    # Regex for amount (with optional sign, comma, decimal)
+    amount_pattern = re.compile(r'([-+]?\d{1,3}(?:,\d{3})*(?:\.\d{2})?|[-+]?\d+\.\d{2})')
+    lines = ocr_text.strip().split('\n')
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        date_match = date_pattern.search(line)
+        amount_match = amount_pattern.findall(line)
+        if date_match and amount_match:
+            date = date_match.group(0)
+            # Assume last number is amount
+            amount = amount_match[-1].replace(',', '')
+            try:
+                amount = float(amount)
+            except Exception:
+                continue
+            # Remove date and amount from line to get description/reference
+            desc_ref = line
+            desc_ref = desc_ref.replace(date, '').replace(str(amount_match[-1]), '').strip()
+            # Try to split description and reference by last space or pipe
+            if '|' in desc_ref:
+                description, reference = [x.strip() for x in desc_ref.rsplit('|', 1)]
+            else:
+                parts = desc_ref.rsplit(' ', 1)
+                if len(parts) == 2:
+                    description, reference = parts[0].strip(), parts[1].strip()
+                else:
+                    description, reference = desc_ref, ''
+            transactions.append({
+                'transactionDate': date,
+                'description': description,
+                'referenceNumber': reference,
+                'amount': amount
+            })
+    return transactions
 import re
 import pandas as pd
 from typing import List, Dict, Any
@@ -56,128 +103,107 @@ def parse_ledger_text(ocr_text: str) -> List[Dict[str, Any]]:
         Its effectiveness is limited, and `parse_ledger_data_from_dataframe`
         is the preferred method if detailed OCR output (with coordinates) is available.
     """
-    transactions: List[Dict[str, Any]] = []
-    lines = ocr_text.strip().split('\n')
 
-    # Very naive approach: try to identify lines that look like transaction data.
-    # This will need to be much more robust.
-    # For example, we might look for lines that have a date, and/or monetary values.
+    import re
 
-    # A more advanced approach would use pytesseract.image_to_data to get bounding boxes
-    # and then try to reconstruct the table structure based on spatial relationships.
-    # This current approach assumes a relatively clean, line-by-line OCR output
-    # where each transaction or part of it is on its own line(s).
+    # --- Extract metadata ---
+    journal_name = None
+    period = None
+    lines = ocr_text.splitlines()
+    for line in lines[:10]:  # Only look at the first 10 lines for metadata
+        if not journal_name and "Bayou Meto Baptist Church" in line:
+            journal_name = line.strip()
+        if not period:
+            m = re.search(r"January through December \d{4}", line)
+            if m:
+                period = m.group(0)
 
-    current_transaction: Dict[str, Any] = {}
-    # Regex to identify potential monetary values (Debit/Credit)
-    # Allows for optional $ and commas, requires two decimal places if a decimal point is present.
-    money_pattern = re.compile(r'^\$?((\d{1,3}(,\d{3})*|\d+)(\.\d{2})?|\.\d{2})$')
-    # Regex for common date formats (YYYY-MM-DD, MM/DD/YYYY, MM-DD-YY, etc.)
-    # Made more flexible, but still might need adjustment for other specific formats.
-    date_pattern = re.compile(
-        r'\b(\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{4}[-/]\d{1,2}[-/]\d{1,2}|'
-        r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s\d{1,2},\s\d{4})\b',
-        re.IGNORECASE
-    )
-
-    # Placeholder for column headers if found
-    header_indices: Dict[str, int] = {} # Store column start index if we can identify them
-    header_line_num = -1
-
-    logger.info(f"Starting text parsing for {len(lines)} lines.")
-    for line_num, line in enumerate(lines):
-        line = line.strip()
-        if not line:
+    cleaned_lines = []
+    header_patterns = [
+        r"^\s*Bayou Meto Baptist Church",
+        r"^\s*Journal",
+        r"^\s*January through December ",
+        r"^\s*\d{1,2}:\d{2} ?[AP]M$",  # time
+        r"^\s*\d{2}/\d{2}/\d{2,4}$",   # date
+        r"^\s*Trans #\s+Type\s+Date",  # table header
+        r"^\s*Page \d+",
+        r"^\s*$"
+    ]
+    header_re = re.compile("|".join(header_patterns))
+    for line in lines:
+        if header_re.match(line):
             continue
-
-        # Attempt to identify a header row to understand column positions
-        # This is a very simplistic header detection
-        # Consider making keywords for header detection configurable or more robust
-        if not header_indices and all(col.lower() in line.lower() for col in ["Date", "Debit", "Credit", "Name"]): # Key columns
-            temp_indices = {}
-            line_lower = line.lower()
-            for col_name in EXPECTED_COLUMNS:
-                try:
-                    # Find start index of the column name (case-insensitive)
-                    temp_indices[col_name] = line_lower.index(col_name.lower())
-                except ValueError:
-                    logger.debug(f"Column '{col_name}' not found in potential header line: '{line}'")
-
-            # Require at least a few key columns to be found to consider it a header
-            if len(temp_indices) >= 4 and "Date" in temp_indices and ("Debit" in temp_indices or "Credit" in temp_indices):
-                header_indices = dict(sorted(temp_indices.items(), key=lambda item: item[1])) # Sort by index
-                header_line_num = line_num
-                logger.info(f"Detected potential header on line {line_num}: '{line}'. Column start indices: {header_indices}")
-                continue # Skip header line from data processing
-
-        if line_num == header_line_num: # Ensure we definitely skip the identified header line
+        if re.match(r"^\s*[\d,\.]+\s+[\d,\.]+\s*$", line):
             continue
+        cleaned_lines.append(line.rstrip())
 
-        # Simplistic row parsing - this needs a lot of work. Emphasize this is a fallback or basic parser.
-        # This section is highly dependent on the structure of the OCR'd text and
-        # the reliability of column separation by spaces.
-        # It's generally NOT ROBUST for complex tables or OCR with misaligned text.
+    transactions = []
+    current_group = []
+    for line in cleaned_lines:
+        if re.match(r"^\s*\d{5,}\b", line):
+            if current_group:
+                transactions.append(current_group)
+            current_group = [line]
+        else:
+            if current_group:
+                current_group.append(line)
+    if current_group:
+        transactions.append(current_group)
 
-        # If headers were found, one could try to slice the line based on header_indices.
-        # This is still fragile if column values run into each other.
-        # For now, the existing split by multiple spaces is kept as a basic attempt.
-        parts = re.split(r'\s{2,}', line) # Split by 2 or more spaces
+    parsed_entries = []
+    for group in transactions:
+        if not group:
+            continue
+        primary = group[0]
+        primary_match = re.match(r"^\s*(\d{5,})\s+(\w[\w ]*)\s+(\d{2}/\d{2}/\d{4})\s+(\d+)\s+([\w\s\.,&'-]+)", primary)
+        if primary_match:
+            trans_num = primary_match.group(1)
+            trans_type = primary_match.group(2).strip()
+            trans_date = primary_match.group(3)
+            trans_num_field = primary_match.group(4)
+            trans_name = primary_match.group(5).strip()
+        else:
+            trans_num = ''
+            trans_type = ''
+            trans_date = ''
+            trans_num_field = ''
+            trans_name = ''
 
-        # This heuristic (len(parts) >= 5) is arbitrary and likely insufficient.
-        # A more robust approach involves `image_to_data` (see `parse_ledger_data_from_dataframe`).
-        if len(parts) >= 3: # Reduced minimum parts, as some lines might be sparse (e.g. only memo and one amount)
-            transaction: Dict[str, Any] = {col: None for col in EXPECTED_COLUMNS}
-
-            # Naive assignment based on parts. This is extremely brittle.
-            # Example: Try to find date and amounts, then fill others.
-            date_match = date_pattern.search(line)
-            if date_match:
-                transaction["Date"] = date_match.group(0)
-
-            # Try to identify debit/credit based on money pattern and position (e.g., last two parts if they look like money)
-            potential_amounts = [p for p in parts if money_pattern.match(p)]
-            if len(potential_amounts) == 1:
-                # Ambiguous if it's debit or credit without column context.
-                # This requires a rule, e.g. "if only one amount, assume it's in 'Debit' if positive, or based on keywords"
-                # For now, let's put it in Debit if no other info.
-                # This is highly speculative.
-                transaction["Debit"] = potential_amounts[0].replace('$', '').replace(',', '')
-            elif len(potential_amounts) >= 2:
-                # Assume last two are credit then debit, or vice-versa. This also needs context.
-                # A common layout is Debit then Credit.
-                # This is also highly speculative.
-                val1_str = potential_amounts[-2].replace('$', '').replace(',', '')
-                val2_str = potential_amounts[-1].replace('$', '').replace(',', '')
-                # Simple heuristic: if one is empty or zero-like, the other is the value.
-                # Or, if column headers are known, align with them.
-                # For now, assign to Debit and Credit somewhat arbitrarily if both look valid.
-                transaction["Debit"] = val1_str if val1_str else None # Or some other logic
-                transaction["Credit"] = val2_str if val2_str else None
-
-            # This is a very weak condition to add a transaction.
-            # It's more for showing the data structure.
-            if transaction["Date"] or transaction["Debit"] or transaction["Credit"]:
-                # Fill other fields heuristically (very unreliable)
-                transaction["Type"] = parts[0] if len(parts) > 0 and not date_pattern.search(parts[0]) and not money_pattern.match(parts[0]) else None
-                transaction["Name"] = parts[1] if len(parts) > 1 and transaction["Type"] else (parts[0] if len(parts) > 0 and not transaction["Type"] else None) # Highly guessed
-                transaction["Memo"] = line # Default: put the whole line in memo if detailed parsing fails
-
-                transactions.append(transaction)
-                logger.debug(f"Potentially parsed (basic text-based): {transaction}")
-            else:
-                logger.debug(f"Skipping line, no clear transaction indicators: '{line}'")
-
-    # Post-processing (conceptual)
-    # - Merge multi-line transactions (e.g., paychecks split across lines). This needs more advanced logic.
-    # - Clean up data (strip whitespace, convert monetary strings to float/Decimal).
-    # - Validate data against expected types or rules.
-
-    if not transactions and ocr_text.strip(): # Check if ocr_text had content
-        logger.warning("No transactions were parsed from the provided text. The text might not be structured as expected, or the parsing logic needs significant improvement for this format.")
-    elif transactions:
-        logger.info(f"Basic text parsing yielded {len(transactions)} potential transaction entries. Further refinement and validation needed.")
-
-    return transactions
+        for line in group:
+            line = re.sub(r"^\s*\d{5,}\s+", "", line)
+            money_matches = re.findall(r"(\d{1,3}(?:,\d{3})*\.\d{2})", line)
+            debit = credit = ''
+            if len(money_matches) == 2:
+                debit, credit = money_matches
+            elif len(money_matches) == 1:
+                if 'Debit' in line:
+                    debit = money_matches[0]
+                else:
+                    credit = money_matches[0]
+            line_wo_money = re.sub(r"(\d{1,3}(?:,\d{3})*\.\d{2})", "", line)
+            parts = re.split(r"\s{2,}", line_wo_money.strip())
+            account = memo = ''
+            if len(parts) >= 2:
+                account = parts[-1].strip()
+                memo = parts[-2].strip()
+            elif len(parts) == 1:
+                account = parts[0].strip()
+            entry = {
+                'Journal Name': journal_name,
+                'Period': period,
+                'Trans #': trans_num,
+                'Type': trans_type,
+                'Date': trans_date,
+                'Reference Number': trans_num_field,
+                'Name': trans_name,
+                'Memo/Description': memo,
+                'Account': account,
+                'Debit': debit,
+                'Credit': credit
+            }
+            if account or debit or credit:
+                parsed_entries.append(entry)
+    return parsed_entries
 
 
 def parse_ledger_data_from_dataframe(df: pd.DataFrame) -> List[Dict[str, Any]]:

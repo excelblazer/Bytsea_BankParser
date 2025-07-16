@@ -9,10 +9,25 @@ interface TransactionDisplayProps {
   transactions: ParsedTransaction[];
 }
 
+
+// Detect if this is a ledger export by checking for ledger-specific fields
+const isLedger = (tx: any) =>
+  tx && (
+    'Journal Name' in tx ||
+    'Trans #' in tx ||
+    'Reference Number' in tx ||
+    'Memo/Description' in tx ||
+    'Account' in tx ||
+    'Debit' in tx ||
+    'Credit' in tx
+  );
+
 const TransactionDisplay: React.FC<TransactionDisplayProps> = ({ transactions }) => {
   if (transactions.length === 0) {
     return <p className="text-center text-slate-400 mt-6">No transactions to display.</p>;
   }
+
+  const ledgerMode = isLedger(transactions[0]);
 
   const generateExportFileName = (extension: string) => {
     // Get client name and bank name from the first transaction
@@ -100,28 +115,43 @@ const TransactionDisplay: React.FC<TransactionDisplayProps> = ({ transactions })
   return (
     <div className="mt-8 w-full bg-slate-800 shadow-xl rounded-lg p-6">
       <h3 className="text-2xl font-semibold text-blue-400 mb-4 text-center">Extracted Transactions</h3>
-      
-      {/* Statement Info */}
+
+      {/* Metadata/Statement Info */}
       {transactions.length > 0 && (
         <div className="bg-slate-700 rounded-lg p-4 mb-6">
-          <h4 className="text-lg font-medium text-blue-300 mb-2">Statement Information</h4>
+          <h4 className="text-lg font-medium text-blue-300 mb-2">{ledgerMode ? 'Ledger Metadata' : 'Statement Information'}</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <p className="text-slate-400 text-sm">Bank</p>
-              <p className="text-slate-200">{transactions[0].bankName}</p>
-            </div>
-            <div>
-              <p className="text-slate-400 text-sm">Client</p>
-              <p className="text-slate-200">{transactions[0].clientName}</p>
-            </div>
-            <div>
-              <p className="text-slate-400 text-sm">Period</p>
-              <p className="text-slate-200">{localStorage.getItem('statement_period') || "Not available"}</p>
-            </div>
-            <div>
-              <p className="text-slate-400 text-sm">Currency</p>
-              <p className="text-slate-200">{localStorage.getItem('statement_currency') || "Not detected"}</p>
-            </div>
+            {ledgerMode ? (
+              <>
+                <div>
+                  <p className="text-slate-400 text-sm">Journal Name</p>
+                  <p className="text-slate-200">{(transactions[0] as any)['Journal Name'] || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400 text-sm">Period</p>
+                  <p className="text-slate-200">{(transactions[0] as any)['Period'] || 'N/A'}</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <p className="text-slate-400 text-sm">Bank</p>
+                  <p className="text-slate-200">{transactions[0].bankName}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400 text-sm">Client</p>
+                  <p className="text-slate-200">{transactions[0].clientName}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400 text-sm">Period</p>
+                  <p className="text-slate-200">{localStorage.getItem('statement_period') || "Not available"}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400 text-sm">Currency</p>
+                  <p className="text-slate-200">{localStorage.getItem('statement_currency') || "Not detected"}</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -144,29 +174,51 @@ const TransactionDisplay: React.FC<TransactionDisplayProps> = ({ transactions })
         <table className="min-w-full divide-y divide-slate-700 ">
           <thead className="bg-slate-700 sticky top-0">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Date
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Description
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                Reference
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                {`Amount${localStorage.getItem('statement_currency') ? ` (${localStorage.getItem('statement_currency')})` : ''}`}
-              </th>
+              {ledgerMode ? (
+                <>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Trans #</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Type</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Date</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Reference #</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Name</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Memo/Description</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Account</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Debit</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Credit</th>
+                </>
+              ) : (
+                <>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Date</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Description</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Reference</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">{`Amount${localStorage.getItem('statement_currency') ? ` (${localStorage.getItem('statement_currency')})` : ''}`}</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody className="bg-slate-800 divide-y divide-slate-700">
             {transactions.map((transaction, index) => (
               <tr key={index} className="hover:bg-slate-700/50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{transaction.transactionDate}</td>
-                <td className="px-6 py-4 text-sm text-slate-300 min-w-[200px] max-w-xs truncate" title={transaction.description}>{transaction.description}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{transaction.referenceNumber}</td>
-                <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${transaction.amount >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {transaction.amount.toFixed(2)}
-                </td>
+                {ledgerMode ? (
+                  <>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-300">{(transaction as any)['Trans #']}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-300">{(transaction as any)['Type']}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-300">{(transaction as any)['Date']}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-300">{(transaction as any)['Reference Number']}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-300">{(transaction as any)['Name']}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-300">{(transaction as any)['Memo/Description']}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-300">{(transaction as any)['Account']}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-green-400">{(transaction as any)['Debit']}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-purple-300">{(transaction as any)['Credit']}</td>
+                  </>
+                ) : (
+                  <>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{transaction.transactionDate}</td>
+                    <td className="px-6 py-4 text-sm text-slate-300 min-w-[200px] max-w-xs truncate" title={transaction.description}>{transaction.description}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{transaction.referenceNumber}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${transaction.amount >= 0 ? 'text-green-400' : 'text-red-400'}`}>{transaction.amount.toFixed(2)}</td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>

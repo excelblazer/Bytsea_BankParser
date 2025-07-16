@@ -85,6 +85,8 @@ jobs:
         env:
           # Set GitHub Pages environment variable for proper base path
           GITHUB_PAGES: 'true'
+          # Use the OCR API URL from the repository variables (set by the backend workflow)
+          VITE_OCR_API_URL: ${{ vars.OCR_API_URL }}
 
       - name: Verify build security
         run: |

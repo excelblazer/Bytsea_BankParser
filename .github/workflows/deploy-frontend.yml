@@ -1,0 +1,57 @@
+name: Deploy Frontend to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'api/**'
+      - 'ocr_parser/**'
+      - 'requirements.txt'
+      - 'vercel.json'
+      - '.vercelignore'
+      - 'setup_vercel_env.sh'
+      - 'deploy_vercel.sh'
+      - 'test_vercel_deployment.py'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install Dependencies
+        run: npm ci
+        
+      - name: Get OCR API URL
+        id: get-ocr-api
+        run: |
+          API_URL=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/variables/OCR_API_URL | \
+            grep -o '"value": "[^"]*' | cut -d'"' -f4)
+            
+          if [ -z "$API_URL" ]; then
+            echo "No OCR_API_URL variable found, using default"
+            API_URL="https://bytsea-bank-parser-api.vercel.app"
+          fi
+          
+          echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+          echo "Using OCR API URL: $API_URL"
+      
+      - name: Build
+        env:
+          VITE_OCR_API_URL: ${{ steps.get-ocr-api.outputs.API_URL }}
+        run: npm run build
+        
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages

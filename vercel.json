@@ -1,12 +1,5 @@
 {
   "version": 2,
-  "name": "bytsea-backend-ocr",
-  "functions": {
-    "api/*.py": {
-      "memory": 1024,
-      "maxDuration": 30
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",

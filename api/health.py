@@ -16,6 +16,15 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger('ocr_api')
 
 class handler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        """Handle preflight CORS requests"""
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.send_header('Access-Control-Max-Age', '86400')  # 24 hours
+        self.end_headers()
+        
     def do_GET(self):
         # Optional: clean up old cache entries periodically when health is checked
         cache_dir = '/tmp/ocr_cache'

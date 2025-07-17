@@ -37,14 +37,38 @@ fi
 # Deploy
 echo ""
 echo "Starting deployment of minimal test version..."
-$DEPLOY_CMD
+VERCEL_URL=$($DEPLOY_CMD)
+DEPLOY_STATUS=$?
 
 # Check if deployment was successful
-if [ $? -eq 0 ]; then
+if [ $DEPLOY_STATUS -eq 0 ]; then
   echo ""
-  echo "✅ Test deployment successful!"
+  echo "✅ Test deployment successful at: $VERCEL_URL"
   echo ""
-  echo "Test the health endpoint by adding /api/health to the URL"
+  
+  # Test the health endpoint
+  echo "Testing health endpoint at $VERCEL_URL/api/health..."
+  echo "Waiting for deployment to fully propagate (15 seconds)..."
+  sleep 15
+  
+  # First test OPTIONS for CORS preflight
+  echo "Testing OPTIONS preflight request..."
+  curl -s -I -X OPTIONS "$VERCEL_URL/api/health"
+  
+  # Now try the GET request
+  echo ""
+  echo "Testing GET request..."
+  HEALTH_STATUS=$(curl -s -w "\nStatus: %{http_code}" "$VERCEL_URL/api/health")
+  HEALTH_CODE=$(echo "$HEALTH_STATUS" | grep "Status:" | cut -d' ' -f2)
+  
+  echo "$HEALTH_STATUS"
+  
+  if [ "$HEALTH_CODE" == "200" ]; then
+    echo "✅ Health check passed!"
+  else
+    echo "⚠️ Health check returned status $HEALTH_CODE"
+    echo "This might indicate an issue with the deployment."
+  fi
 else
   echo ""
   echo "❌ Deployment failed. Check the error messages above."

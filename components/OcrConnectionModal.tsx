@@ -31,11 +31,11 @@ const OcrConnectionModal: React.FC<OcrConnectionModalProps> = ({
         }, 1500);
       } else {
         setConnectionStatus('error');
-        setErrorMessage('OCR backend service is not available. Please try again later or use Gemini API.');
+        setErrorMessage('OCR backend service is currently unavailable. The service may be starting up or experiencing issues. Please try again in a few moments or use the Gemini AI API option.');
       }
     } catch (error) {
       setConnectionStatus('error');
-      setErrorMessage('Failed to connect to OCR backend. Please check your connection and try again.');
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to connect to OCR backend. Please check your connection and try again.');
     }
   };
 

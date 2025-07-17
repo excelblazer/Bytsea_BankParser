@@ -12,8 +12,9 @@
     "dev": "vite",
     "build": "vite build && node inject-assets.js",
     "preview": "vite preview",
-    "deploy": "node deploy.js",
-    "deploy:gh": "node deploy-gh.js",
+    "deploy:frontend": "node deploy-gh.js",
+    "deploy:backend": "./deploy-backend-only.sh",
+    "validate": "./validate-separation.sh",
     "predeploy": "npm run build"
   },
   "dependencies": {

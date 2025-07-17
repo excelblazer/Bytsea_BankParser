@@ -143,9 +143,22 @@ These integrations will follow the same secure client-side approach, with no ser
 
 3. **Access the App**: Open the application in your web browser at the URL displayed in the terminal (typically `http://localhost:5173`).
 
-### GitHub Pages Deployment
+### Deployment Architecture
 
-The application uses an enhanced GitHub Actions workflow for secure deployment to GitHub Pages:
+The application uses a **separated deployment architecture** for optimal performance and cost efficiency:
+
+- **Frontend**: Deployed to **GitHub Pages** (React application)
+- **Backend**: Deployed to **Vercel** (Python OCR services)
+
+This separation provides:
+- ✅ **Cost Efficiency**: GitHub Pages is free, Vercel has generous free tier
+- ✅ **Performance**: Frontend served from GitHub's CDN
+- ✅ **Scalability**: Backend auto-scales with demand
+- ✅ **Reliability**: Independent services reduce failure points
+
+### Frontend Deployment (GitHub Pages)
+
+The frontend React application is deployed to GitHub Pages with enhanced security:
 
 1. **Fork or Clone the Repository**: Get your own copy of the code.
 
@@ -154,10 +167,11 @@ The application uses an enhanced GitHub Actions workflow for secure deployment t
    - Navigate to Pages section
    - Under "Build and deployment", ensure it's set to "GitHub Actions"
 
-3. **Deploy Options**:
-   - **Automatic Deployment**: Whenever you push changes to the main branch, the workflow runs security checks and then deploys the application.
-   - **Manual Deployment**: You can manually trigger the deployment from the Actions tab in your repository.
-   - **Pull Request Validation**: The workflow runs security checks on pull requests without deploying.
+3. **Deploy Frontend**:
+   ```bash
+   # Deploy the React frontend to GitHub Pages
+   npm run deploy:frontend
+   ```
 
 4. **Security-Enhanced Deployment Process**:
    - **Security Audit**: Checks dependencies for known vulnerabilities
@@ -165,20 +179,47 @@ The application uses an enhanced GitHub Actions workflow for secure deployment t
    - **Build Security Verification**: Ensures no secrets are accidentally included in the build
    - **Security Headers Check**: Verifies security-related HTTP headers on the deployed application
 
-5. **Deployment Flow**:
-   - The workflow runs security checks first
-   - Then builds the application with correct base paths
-   - Configures GitHub Pages with appropriate settings
-   - Uploads and deploys the build artifacts
-   - Performs post-deployment security verification
+### Backend Deployment (Vercel)
 
-6. **Access the Deployed Application**: Once deployed, your application will be available at the URL provided in the workflow summary.
+The backend OCR services are deployed separately to Vercel:
 
-7. **Troubleshooting Deployment**:
-   - Check the Actions tab for detailed logs of each step
-   - Review security audit results for potential issues
-   - Check the type checking logs for TypeScript errors
-   - Ensure no secrets are included in your repository that might trigger the security checks
+1. **Deploy Backend Only**:
+   ```bash
+   # Deploy only the OCR backend services to Vercel
+   npm run deploy:backend
+   ```
+
+2. **Update Frontend Configuration**:
+   - Copy the Vercel backend URL provided after deployment
+   - Update `services/config.ts` with your backend URL, or
+   - Create `.env.production` with `VITE_OCR_API_URL=https://your-backend-url.vercel.app`
+
+3. **Redeploy Frontend** (if needed):
+   ```bash
+   npm run deploy:frontend
+   ```
+
+### Complete Deployment Process
+
+For a full deployment from scratch:
+
+```bash
+# 1. Deploy backend to Vercel
+npm run deploy:backend
+
+# 2. Note the backend URL and update frontend config
+# Edit services/config.ts or create .env.production
+
+# 3. Deploy frontend to GitHub Pages  
+npm run deploy:frontend
+```
+
+### Troubleshooting Deployment
+
+- **Backend Issues**: Check Vercel function logs and `/api/health` endpoint
+- **Frontend Issues**: Check GitHub Actions logs and browser console
+- **Connection Issues**: Verify CORS configuration and backend URL
+- **Detailed Guide**: See `DEPLOYMENT_SEPARATION_GUIDE.md` for complete instructions
 
 ## How to Use
 

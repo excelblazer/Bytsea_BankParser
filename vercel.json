@@ -26,22 +26,16 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/health",
-      "dest": "/api/health.py"
+      "source": "/api/health",
+      "destination": "/api/health.py"
     },
     {
-      "src": "/api/parse",
-      "dest": "/api/parse.py"
+      "source": "/api/parse",
+      "destination": "/api/parse.py"
     },
     {
-      "src": "/api/tesseract_check",
-      "dest": "/api/tesseract_check.py"
+      "source": "/api/tesseract_check",
+      "destination": "/api/tesseract_check.py"
     }
   ]
 }

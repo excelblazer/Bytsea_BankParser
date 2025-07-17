@@ -2,6 +2,21 @@
 .git
 .github
 
+# Frontend-specific files (exclude from backend deployment)
+components/
+services/
+public/
+src/
+dist/
+node_modules/
+index.html
+index.tsx
+App.tsx
+*.config.ts
+*.config.js
+package.json
+package-lock.json
+
 # Dependencies and build outputs
 node_modules
 dist
@@ -21,3 +36,9 @@ venv
 # Documentation and sample files
 README.md
 sample
+*.md
+
+# Test files
+test_*.py
+*_test.py
+tests/

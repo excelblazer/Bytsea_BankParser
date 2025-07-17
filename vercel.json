@@ -18,7 +18,10 @@
   "builds": [
     {
       "src": "api/*.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": "ocr_parser/**"
+      }
     }
   ],
   "rewrites": [

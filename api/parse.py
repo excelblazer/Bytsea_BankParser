@@ -198,6 +198,18 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
         self.wfile.write(json.dumps(data).encode())
+
+# Export the handler for Vercel
+            
+    def send_json_response(self, status_code, data):
+        """Helper to send JSON responses with CORS headers"""
+        self.send_response(status_code)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
             
     def send_error_response(self, status_code, error_message):
         """Helper to send error responses with CORS headers"""
@@ -209,4 +221,4 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({'error': error_message}).encode())
 
-handler = VercelHTTPHandler
+# Export the handler for Vercel

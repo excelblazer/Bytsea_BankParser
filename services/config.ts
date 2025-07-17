@@ -2,7 +2,7 @@
 // Production: Use environment variable or default to your dedicated backend Vercel deployment
 // Development: Use local development server
 export const OCR_API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? import.meta.env.VITE_OCR_API_URL || 'https://bytsea-backend-ocr.vercel.app' // UPDATE THIS with your actual backend deployment URL
+  ? import.meta.env.VITE_OCR_API_URL || 'https://bytseabankparser-c52nl88o2-bytseaparser-projects-c57bbfbe.vercel.app' // Your Vercel backend deployment URL
   : 'http://localhost:8000'; // Changed to 8000 (Python Flask typical port)
 
 // Log the API URL to help with debugging

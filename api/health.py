@@ -98,4 +98,4 @@ class handler(BaseHTTPRequestHandler):
         }).encode())
         return
 
-handler = VercelHTTPHandler
+# Export the handler for Vercel

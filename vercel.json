@@ -29,5 +29,19 @@
       "source": "/api/(.*)",
       "destination": "/api/$1"
     }
+  ],
+  "routes": [
+    {
+      "src": "/api/health",
+      "dest": "/api/health.py"
+    },
+    {
+      "src": "/api/parse",
+      "dest": "/api/parse.py"
+    },
+    {
+      "src": "/api/tesseract_check",
+      "dest": "/api/tesseract_check.py"
+    }
   ]
 }

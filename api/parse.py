@@ -29,7 +29,7 @@ logger = logging.getLogger('ocr_api')
 # Initialize cache
 cache = FileCache(cache_dir='/tmp/ocr_cache', ttl_days=7)
 
-class VercelHTTPHandler(BaseHTTPRequestHandler):
+class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         """Handle preflight CORS requests"""
         self.send_response(200)

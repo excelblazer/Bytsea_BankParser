@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO,
                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('ocr_api')
 
-class VercelHTTPHandler(BaseHTTPRequestHandler):
+class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         # Optional: clean up old cache entries periodically when health is checked
         cache_dir = '/tmp/ocr_cache'

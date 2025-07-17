@@ -1,13 +1,5 @@
 {
   "version": 2,
-  "functions": {
-    "api/health.py": {
-      "runtime": "@vercel/python@3.12"
-    },
-    "api/parse.py": {
-      "runtime": "@vercel/python@3.12"
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",

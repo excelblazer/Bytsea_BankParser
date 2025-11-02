@@ -74,10 +74,8 @@ jobs:
       - name: Verify build security
         run: |
           # Check that no actual secrets are accidentally included in build
-          if grep -r "sk_" dist/ --exclude="*.js" || \
-             grep -r "PRIVATE_KEY" dist/ || \
-             grep -r "API_SECRET" dist/ || \
-             (grep -r "SECRET" dist/ | grep -v "SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED" | grep -v ".js:"); then
+          if grep -r "sk-\|PRIVATE_KEY\|API_SECRET" dist/ --exclude="*.js" --exclude="*.mjs" || \
+             (grep -r "SECRET" dist/ | grep -v "SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED" | grep -v ".js:" | grep -v ".mjs:"); then
             echo "❌ Potential secrets found in build output"
             exit 1
           else

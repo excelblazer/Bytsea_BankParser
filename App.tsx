@@ -5,7 +5,6 @@ import Spinner from './components/Spinner';
 import ParsingOptions from './components/ParsingOptions';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 import GeminiApiModal from './components/GeminiApiModal';
-import OcrConnectionModal from './components/OcrConnectionModal';
 import { DocumentTypeProvider, useDocumentType } from './components/DocumentTypeContext';
 import { ParsedTransaction } from './types';
 import { parseStatementWithLLM } from './services/llmService';
@@ -32,7 +31,6 @@ const AppContent: React.FC = () => {
   const [parsingMethod, setParsingMethod] = useState<LLMProvider | 'ocr' | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<LLMProvider | null>(null);
   const [showGeminiModal, setShowGeminiModal] = useState<boolean>(false);
-  const [showOcrModal, setShowOcrModal] = useState<boolean>(false);
   const [ocrProgress, setOcrProgress] = useState<{ status: string; progress: number } | null>(null);
 
   // Check for API key in local storage when component mounts
@@ -288,14 +286,6 @@ const AppContent: React.FC = () => {
             onClose={() => setShowGeminiModal(false)}
             onKeySet={handleApiKeySet}
             apiKeyStatus={apiKeyStatus}
-          />
-        )}
-
-        {showOcrModal && (
-          <OcrConnectionModal
-            isOpen={showOcrModal}
-            onClose={() => setShowOcrModal(false)}
-            onConnect={async () => true} // OCR is now always available
           />
         )}
       </div>

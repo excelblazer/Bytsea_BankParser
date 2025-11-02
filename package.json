@@ -11,11 +11,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node inject-assets.js",
-    "preview": "vite preview",
-    "deploy:frontend": "node deploy-gh.js",
-    "deploy:backend": "./deploy-backend-only.sh",
-    "validate": "./validate-separation.sh",
-    "predeploy": "npm run build"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@google/genai": "^1.5.1",

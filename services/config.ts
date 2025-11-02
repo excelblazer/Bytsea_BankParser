@@ -5,8 +5,9 @@ export const OCR_API_BASE_URL = process.env.NODE_ENV === 'production'
   ? import.meta.env.VITE_OCR_API_URL || 'http://bytseabankparser.vercel.app/' // Updated Vercel backend deployment URL
   : 'http://localhost:8000'; // Changed to 8000 (Python Flask typical port)
 
-// Log the API URL to help with debugging
-console.log('OCR API URL:', OCR_API_BASE_URL);
+// Avoid noisy logs in production; use logger for dev visibility
+import logger from './logger';
+logger.info('OCR API URL:', OCR_API_BASE_URL);
 
 // Health check function to verify backend connectivity
 export async function checkBackendHealth(): Promise<boolean> {

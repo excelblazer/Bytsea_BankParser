@@ -21,11 +21,11 @@ File Upload → Parsing Method Selection → AI/OCR Processing → Transaction E
 - **Gemini AI** (Primary): Client-side processing with user-provided API keys
 - **OCR Backend** (Fallback): Python serverless functions with Tesseract OCR
 - Always check backend availability before offering OCR option
-- Use `services/geminiService.ts` and `services/ocrBackendService.ts` for parsing calls
+- Use `services/geminiService.ts` and `services/ocrService.ts` for parsing calls
 
 ### API Key Management
 - **Never store API keys on servers** - client-side only in localStorage
-- API keys are user-provided through UI modals (`GeminiApiModal`, `OcrConnectionModal`)
+- API keys are user-provided through UI modals (`GeminiApiModal`)
 - Check key validity before enabling parsing features
 - Use `localStorage.getItem('gemini_api_key')` for Gemini access
 
@@ -55,22 +55,20 @@ npm install
 npm run dev  # Frontend only (localhost:5173)
 ```
 
-### Deployment Process
+### Build Process
 ```bash
-# Deploy frontend to GitHub Pages
-npm run deploy:frontend
-
-# Deploy backend to Vercel
-npm run deploy:backend
-
-# Validate separated deployment
-npm run validate
+npm run build  # Includes asset injection via inject-assets.js
 ```
+
+### Deployment Process
+- **Frontend**: GitHub Actions deploys to GitHub Pages on `main` branch pushes
+- **Backend**: Manual Vercel deployment for Python OCR services
+- Separated deployment for cost efficiency and scalability
 
 ### Testing Parsing Logic
 - Use `services/geminiService.ts` for AI parsing tests
 - Backend OCR testing requires Vercel deployment
-- Test files in `ocr_parser/tests/` for Python logic
+- Test files in `services/ocrParser.ts` for Python logic
 - Validate JSON response formats match `types.ts` interfaces
 
 ## Project-Specific Conventions
@@ -85,7 +83,7 @@ npm run validate
 - Graceful fallback from Gemini to OCR when API unavailable
 - User-friendly error messages for API failures
 - Backend availability checks before offering OCR option
-- CORS headers configured in `vercel.json` for API endpoints
+- CORS headers configured in Vercel for API endpoints
 
 ### File Processing
 - Support: PDF, DOCX, TXT, images (JPEG, PNG, WEBP)
@@ -110,9 +108,9 @@ npm run validate
 ```
 services/
 ├── geminiService.ts      # Google Gemini AI integration
-├── ocrBackendService.ts  # Python OCR backend calls
-├── backendService.ts     # Backend health checks
-└── config.ts            # Environment configuration
+├── ocrService.ts         # Tesseract OCR processing
+├── llmService.ts         # LLM provider abstraction
+└── ocrParser.ts          # OCR text parsing logic
 ```
 
 ### Component Organization
@@ -128,15 +126,15 @@ services/
 - GitHub Pages deployment with custom domain support
 
 ### Backend Build (Vercel)
-- Python serverless functions in `/api/`
+- Python serverless functions in `/api/` (when deployed)
 - Tesseract OCR dependency management
 - Rate limiting and caching implemented
 - CORS enabled for frontend communication
 
 ### CI/CD (GitHub Actions)
-- Automated deployment on `main` branch pushes
-- Separated frontend/backend deployment jobs
-- Security checks and dependency audits
+- Automated frontend deployment on `main` branch pushes
+- Security audit and type checking before deployment
+- Build security verification (no secrets in output)
 
 ## Testing Strategy
 
@@ -146,7 +144,7 @@ services/
 - E2E testing for complete parsing workflows
 
 ### Backend Testing
-- Python unit tests in `ocr_parser/tests/`
+- Python unit tests in OCR parser logic
 - OCR accuracy validation
 - API endpoint testing with sample documents
 
@@ -171,9 +169,8 @@ services/
 
 - `constants.ts` - AI prompts and configuration
 - `types.ts` - TypeScript interfaces
-- `services/config.ts` - Environment setup
-- `api/parse.py` - Backend OCR processing
-- `ocr_parser/parser.py` - Python parsing logic
-- `vercel.json` - Backend deployment config
-- `.github/workflows/deploy-combined.yml` - CI/CD pipeline</content>
-<parameter name="filePath">/Users/bytsea/bytseaProject/Bytsea_BankParser/.github/copilot-instructions.md
+- `services/geminiService.ts` - Primary AI parsing logic
+- `services/ocrService.ts` - OCR processing pipeline
+- `App.tsx` - Main application component
+- `vite.config.ts` - Build configuration
+- `.github/workflows/deploy-combined.yml` - CI/CD pipeline

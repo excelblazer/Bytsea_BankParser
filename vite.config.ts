@@ -23,26 +23,49 @@ export default defineConfig(({ mode }: { mode: string }) => {
       resolve: {
         alias: {
           '@': resolve(__dirname, '.'),
+          '@components': resolve(__dirname, './components'),
+          '@config': resolve(__dirname, './config'),
+          '@hooks': resolve(__dirname, './hooks'),
+          '@services': resolve(__dirname, './services'),
+          '@utils': resolve(__dirname, './utils'),
         }
       },
       build: {
         outDir: 'dist',
         sourcemap: mode !== 'production',
-        // Ensure index.html gets copied to the dist folder
         copyPublicDir: true,
-        // Minify output for production builds
         minify: mode === 'production' ? 'esbuild' : false,
         rollupOptions: {
           input: resolve(__dirname, 'index.html'),
           output: {
-            // Ensure asset paths are relative for better compatibility with different deployment environments
             assetFileNames: 'assets/[name].[hash].[ext]',
             chunkFileNames: 'assets/[name].[hash].js',
             entryFileNames: 'assets/[name].[hash].js',
-            // Ensure large chunks are split
+            // Optimized code splitting
             manualChunks(id) {
+              // Vendor chunks for better caching
               if (id.includes('node_modules')) {
+                // Split large vendor libraries
+                if (id.includes('@google/genai')) {
+                  return 'vendor-gemini';
+                }
+                if (id.includes('tesseract.js')) {
+                  return 'vendor-ocr';
+                }
+                if (id.includes('pdfjs-dist')) {
+                  return 'vendor-pdf';
+                }
+                if (id.includes('react') || id.includes('react-dom')) {
+                  return 'vendor-react';
+                }
                 return 'vendor';
+              }
+              // Split config and utils for better caching
+              if (id.includes('/config/')) {
+                return 'config';
+              }
+              if (id.includes('/utils/')) {
+                return 'utils';
               }
             }
           }

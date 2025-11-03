@@ -100,10 +100,14 @@ npm run test:coverage
 
 To install testing dependencies:
 ```bash
-npm install --save-dev vitest @vitest/ui jsdom \
-  @testing-library/react @testing-library/jest-dom \
-  @testing-library/user-event
+npm install --legacy-peer-deps
 ```
+
+**Note**: The project uses React 19, so we've updated to the latest testing library versions that support React 19:
+- `@testing-library/react@^16.3.0`
+- `@testing-library/jest-dom@^6.9.1`
+- `@testing-library/user-event@^14.6.1`
+- `@testing-library/dom@^10.4.1`
 
 ## Performance Optimization ✅
 

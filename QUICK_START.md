@@ -99,7 +99,7 @@ npm run build
 git clone [your-repo-url]
 cd Bytsea_BankParser
 
-# Install dependencies (use --legacy-peer-deps for React 19)
+# Install dependencies (React 19 compatible testing libraries)
 npm install --legacy-peer-deps
 
 # Run tests to verify
